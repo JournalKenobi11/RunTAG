@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec /home/journalkenobi/miniconda3/envs/ml_env/bin/python "${SCRIPT_DIR}/dreeve_engine.py" "$@"
