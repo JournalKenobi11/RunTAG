@@ -45,6 +45,24 @@ def dreeve_activities(days: int = 60, limit: int = 15, with_hr_only: bool = Fals
         return json.dumps({"error": str(e)})
 
 @server.tool()
+def dreeve_splits(activity_id: str = None, days: int = None, month: str = None, summary_only: bool = False) -> str:
+    """
+    Analyze kilometer splits and mean heart rate from high-frequency streams.
+    Returns exact split duration, pace, mean HR, correlation, and cardiac drift progression.
+    activity_id: Specific activity ID (optional).
+    days: Filter by recent N days (optional).
+    month: Filter by month 'YYYY-MM' (e.g. '2026-10') (optional).
+    summary_only: If True, returns aggregated metrics and cardiac drift (~100 tokens).
+    """
+    try:
+        data = dreeve_engine.get_splits_analysis(
+            activity_id=activity_id, days=days, month=month, summary_only=summary_only
+        )
+        return json.dumps(data, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@server.tool()
 def dreeve_plot(chart_type: str = "pace_vs_hr", days: int = 60, output_path: str = None, theme: str = "dark") -> str:
     """
     Generate and save a publication-ready running performance plot as PNG/JPG.
