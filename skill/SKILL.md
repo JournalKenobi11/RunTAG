@@ -25,45 +25,56 @@ Whenever generating workout debriefs, session analyses, or markdown reports, sav
 
 ### A. High-Level Summary & Training Zones (~150 tokens)
 ```bash
-dreeve-cli summary --days 60
+runtag summary --days 60
 ```
 *Returns:* Total activities, mileage, active time, avg pace, best pace, HR min/max/mean, zone breakdown, and pace-HR correlation ($r$, $R^2$).
 
-### B. Kilometer Splits & Cardiac Drift Analytics (~150 tokens)
+### B. Personal Records & Benchmark Bests (~180 tokens)
+```bash
+# Get all verified lifetime benchmark records (400m to 15K)
+runtag records
+
+# Get specific benchmark PB with top 5 historical efforts
+runtag records --distance 1k
+runtag records --distance 5k
+```
+*Returns:* Benchmark record time, average pace, speed, date achieved, activity name, and historical rankings.
+
+### C. Kilometer Splits & Cardiac Drift Analytics (~150 tokens)
 ```bash
 # Instant cardiac drift progression across all October splits (summary only)
-dreeve-cli splits --month 2026-10 --summary-only
+runtag splits --month 2026-10 --summary-only
 
 # Splits for a specific activity or timeframe
-dreeve-cli splits --activity <activity_id>
-dreeve-cli splits --days 30
+runtag splits --activity <activity_id>
+runtag splits --days 30
 ```
 *Returns:* Decompressed sub-second telemetry with exact split time, pace, mean HR, and kilometer progression.
 
-### C. Structured & Variable Interval Workout Analytics (~250 tokens)
+### D. Structured & Variable Interval Workout Analytics (~250 tokens)
 ```bash
 # Auto-detect intervals for the latest run or specific activity
-dreeve-cli intervals
-dreeve-cli intervals --activity <activity_id>
+runtag intervals
+runtag intervals --activity <activity_id>
 
 # With an intended workout plan (supports arbitrary variable intervals & ladders)
-dreeve-cli intervals --plan "0.8k easy, 2x1.5k @ 6:00, 1k @ 7:00"
-dreeve-cli intervals --plan "1k warmup + 4x1K @6:15 with 90s walk + 0.5k cooldown"
+runtag intervals --plan "0.8k easy, 2x1.5k @ 6:00, 1k @ 7:00"
+runtag intervals --plan "1k warmup + 4x1K @6:15 with 90s walk + 0.5k cooldown"
 ```
 *Returns:* Exact segment breakdown (warmup, work intervals, walk/jog recoveries, cooldown), target pace vs actual pace delta, intra-interval micro-splits, heart rate recovery drop during rest, and an annotated publication-ready telemetry plot in `output/`.
 
-### D. List Specific Runs & Workouts (~200 tokens)
+### E. List Specific Runs & Workouts (~200 tokens)
 ```bash
-dreeve-cli activities --days 60 --limit 15 --with-hr
+runtag activities --days 60 --limit 15 --with-hr
 ```
 *Optional flags:*
 * `--with-hr`: Only return workouts with recorded heart rate.
 * `--search "HIIT"`: Search workouts by name or description.
 * `--limit 10`: Limit rows to protect context size.
 
-### E. Automated Chart Generation
+### F. Automated Chart Generation
 ```bash
-dreeve-cli plot --type pace_vs_hr --days 60 --theme dark
+runtag plot --type pace_vs_hr --days 60 --theme dark
 ```
 *Supported chart types:*
 * `--type pace_vs_hr`: Standalone Pace vs Heart Rate scatter with zone shading and regression line.
@@ -71,16 +82,16 @@ dreeve-cli plot --type pace_vs_hr --days 60 --theme dark
 * `--theme dark` or `--theme light`.
 * All output images (PNG + JPEG) are automatically saved to `output/`.
 
-### F. Self-Hosted Web Chatbot UI (Docker)
+### G. Self-Hosted Web Chatbot UI (Docker)
 A containerized Streamlit interactive running coach runs locally on port `8501`:
 * **URL:** `http://localhost:8501`
 * **Container Name:** `dreeve-running-chat`
 * **Features:** Natural language workout query processor, instant interval breakdown tables, inline telemetry plots, and weekly mileage volume charts.
 
-### G. Custom Read-Only Queries
+### H. Custom Read-Only Queries
 For questions requiring custom filtering or calculations:
 ```bash
-dreeve-cli query --sql "SELECT name, distance, movingTimeInSeconds FROM Activity WHERE distance > 5000 LIMIT 10"
+runtag query --sql "SELECT name, distance, movingTimeInSeconds FROM Activity WHERE distance > 5000 LIMIT 10"
 ```
 
 ---

@@ -51,6 +51,21 @@ def dreeve_activities(days: int = 60, limit: int = 15, with_hr_only: bool = Fals
         return json.dumps({"error": str(e)})
 
 @server.tool()
+def dreeve_records(distance: str = None, sport: str = "Run") -> str:
+    """
+    Get personal records (PRs / PBs / all-time best efforts) for benchmark distances.
+    Supports distances like '1k', '5k', '10k', '15k', 'mile', '800m', '400m', or 'all'.
+    Returns exact time, pace, date, activity name, speed, and top 5 historical efforts.
+    distance: Specific distance (e.g. '1k', '5k', 'mile', 'all') or leave None for all personal records.
+    sport: Sport type (default 'Run').
+    """
+    try:
+        data = dreeve_engine.get_personal_records(distance=distance, sport=sport)
+        return json.dumps(data, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@server.tool()
 def dreeve_splits(activity_id: str = None, days: int = None, month: str = None, summary_only: bool = False) -> str:
     """
     Analyze kilometer splits and mean heart rate from high-frequency streams.

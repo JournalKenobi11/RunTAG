@@ -150,6 +150,18 @@ RunTAG includes an executable command-line interface for human power users:
 ./runtag intervals --activity <activity_id>
 ```
 
+### Personal Records & Best Efforts (PBs / PRs)
+```bash
+# Query all verified lifetime benchmark personal records (400m to 15K)
+./runtag records
+
+# Query specific benchmark personal best with top 5 historical efforts
+./runtag records --distance 1k
+./runtag records --distance 5k
+./runtag records --distance mile
+```
+*Returns record times, paces, speeds, date achieved, activity name, and historical rankings.*
+
 ### Performance Summary & Training Zones
 ```bash
 ./runtag summary --days 60
@@ -197,6 +209,7 @@ Connect **RunTAG** directly to AI agents (Google Antigravity, Claude Desktop, Cu
 
 | Tool | Key Arguments | Description | Output Size |
 | :--- | :--- | :--- | :--- |
+| **`dreeve_records`** | `distance`, `sport` | Personal bests (PRs/PBs) for benchmark distances (400m to 15K) with top 5 historical efforts. | ~180 tokens |
 | **`dreeve_intervals`** | `activity_id`, `plan`, `generate_plot` | Segments workout repeats, work vs. rest ratios, pace deltas, and recovery HR drops. | ~250 tokens |
 | **`dreeve_summary`** | `days`, `sport` | Mileage, average pace, HR zones, and pace-to-HR correlation ($R^2$). | ~150 tokens |
 | **`dreeve_splits`** | `activity_id`, `month`, `summary_only` | Sub-second kilometer splits, pacing progression, and aerobic decoupling. | ~100 tokens |
