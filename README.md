@@ -1,4 +1,4 @@
-# RunTAG: Tool-Augmented Generation & MCP Server for Running Telemetry 🏃‍♂️⚡
+# RunTAG: Tool-Augmented Generation & MCP Server for Running Telemetry
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Architecture: TAG](https://img.shields.io/badge/Architecture-Tool--Augmented%20Generation%20(TAG)-purple.svg)](#-why-tag-tool-augmented-generation-over-rag)
@@ -16,55 +16,55 @@ Instead of stuffing massive, noisy sensor logs into an LLM context window or rel
 
 ---
 
-## 🧠 Why TAG (Tool-Augmented Generation) Over RAG?
+## Why TAG (Tool-Augmented Generation) Over RAG?
 
 | Metric / Feature | Traditional Vector RAG | RunTAG (Tool-Augmented Generation) |
 | :--- | :--- | :--- |
 | **Data Nature** | Unstructured text documents | High-frequency continuous time-series (1 Hz sensor streams) |
 | **Retrieval Method** | Chunking & Cosine similarity embeddings | Deterministic SQLite WAL queries + in-memory C decompression |
-| **Mathematical Accuracy** | ❌ **High Hallucination Risk** (LLMs cannot reliably calculate statistical regressions over 28,000 floats) | ✅ **100% Deterministic** (Exact C / NumPy array math) |
+| **Mathematical Accuracy** | **High Hallucination Risk** (LLMs cannot reliably calculate statistical regressions over 28,000 floats) | **100% Deterministic** (Exact C / NumPy array math) |
 | **Token Overhead** | 50,000 – 100,000 tokens per workout log | **~150 – 250 tokens** total per analytical response |
 | **Execution Latency** | 10 – 25 seconds (embedding search + massive prompt) | **< 20 milliseconds** end-to-end |
 | **Database Contention** | High (frequent vector re-indexing) | Zero (Direct SQLite URI read-only mode `?mode=ro` with WAL) |
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
     subgraph Clients["1. Clients & Agent Runtimes"]
-        Agent["🤖 AI Agent (Antigravity / Claude / Cursor)"]
-        Terminal["💻 Terminal Athlete / Engineer"]
-        WebChat["💬 Streamlit Web Chatbot"]
+        Agent["AI Agent (Antigravity / Claude / Cursor)"]
+        Terminal["Terminal Athlete / Engineer"]
+        WebChat["Streamlit Web Chatbot"]
     end
 
     subgraph AccessProtocols["2. Protocol Interfaces"]
-        Agent -->|"JSON-RPC 2.0 (stdio)"| MCPServer["🔌 RunTAG MCP Server (dreeve_mcp.py)"]
-        Terminal -->|"CLI Arguments"| CLI["⌨️ runtag CLI Wrapper"]
+        Agent -->|"JSON-RPC 2.0 (stdio)"| MCPServer["RunTAG MCP Server (dreeve_mcp.py)"]
+        Terminal -->|"CLI Arguments"| CLI["runtag CLI Wrapper"]
         WebChat -.->|"Direct Python Import"| CoreEngine
     end
 
     subgraph CoreEngine["3. Deterministic TAG Engine (dreeve_engine.py)"]
-        MCPServer --> EngineCore["⚡ In-Memory Execution Engine"]
+        MCPServer --> EngineCore["In-Memory Execution Engine"]
         CLI --> EngineCore
 
-        EngineCore --> Zstd["📦 C-Level Zstandard Stream Decompressor (<15ms)"]
-        EngineCore --> Segmenter["⏱️ Interval Edge-Detector & Slicer"]
-        EngineCore --> RegexParser["📝 Natural Language Workout Plan Parser"]
-        EngineCore --> Biostats["📐 Cardiac Drift (EF) & HR Recovery Math"]
-        EngineCore --> Visualizer["🎨 Matplotlib 300 DPI Chart Generator"]
+        EngineCore --> Zstd["C-Level Zstandard Stream Decompressor (<15ms)"]
+        EngineCore --> Segmenter["Interval Edge-Detector & Slicer"]
+        EngineCore --> RegexParser["Natural Language Workout Plan Parser"]
+        EngineCore --> Biostats["Cardiac Drift (EF) & HR Recovery Math"]
+        EngineCore --> Visualizer["Matplotlib 300 DPI Chart Generator"]
     end
 
     subgraph Storage["4. Storage & Persistence Layer"]
-        EngineCore -->|"URI Read-Only Mode (?mode=ro)"| SQLite[("🗄️ SQLite Database\n- Activity Records\n- ActivityStream (Zstd BLOBs)")]
-        Visualizer -->|"Saves Images"| OutputDir["📁 output/ (High-Res PNG / JPG)"]
+        EngineCore -->|"URI Read-Only Mode (?mode=ro)"| SQLite[("SQLite Database\n- Activity Records\n- ActivityStream (Zstd BLOBs)")]
+        Visualizer -->|"Saves Images"| OutputDir["output/ (High-Res PNG / JPG)"]
     end
 ```
 
 ---
 
-## ✨ Key Capabilities
+## Key Capabilities
 
 1. **Sub-Second Stream Decompression**:
    * Telemetry is stored as raw Zstandard compressed BLOBs inside SQLite. RunTAG decompresses `time`, `distance`, `heartrate`, `cadence`, `altitude`, and `latlng` directly into contiguous NumPy arrays in under 15 milliseconds.
@@ -85,7 +85,7 @@ flowchart TD
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 RunTAG/
@@ -105,7 +105,7 @@ RunTAG/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Installation
 
@@ -134,7 +134,7 @@ DREEVE_OUTPUT_DIR=./output
 
 ---
 
-## ⌨️ CLI Usage (`./runtag`)
+## CLI Usage (`./runtag`)
 
 RunTAG includes an executable command-line interface for human power users:
 
@@ -173,7 +173,7 @@ RunTAG includes an executable command-line interface for human power users:
 
 ---
 
-## 🔌 Model Context Protocol (MCP) Integration
+## Model Context Protocol (MCP) Integration
 
 Connect **RunTAG** directly to AI agents (Google Antigravity, Claude Desktop, Cursor) by adding it to your agent's MCP configuration (`mcp_config.json`):
 
@@ -206,7 +206,7 @@ Connect **RunTAG** directly to AI agents (Google Antigravity, Claude Desktop, Cu
 
 ---
 
-## 🌐 The Aerolap Ecosystem
+## The Aerolap Ecosystem
 
 * **[Aerolap](https://github.com/JournalKenobi11/Aerolap)**: The full self-hosted sports analytics web platform and database server.
 * **[Running-analytics-chatbot](https://github.com/JournalKenobi11/Running-analytics-chatbot)**: Interactive Streamlit web chat UI powered by the RunTAG engine.
@@ -214,6 +214,6 @@ Connect **RunTAG** directly to AI agents (Google Antigravity, Claude Desktop, Cu
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).

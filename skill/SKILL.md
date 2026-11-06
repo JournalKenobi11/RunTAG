@@ -10,11 +10,11 @@ description: >-
 
 This skill provides direct, token-optimized access to the user's Dreeve running database without writing ad-hoc code or searching filesystem paths.
 
-**Database Path:** `projects/dreeve/storage/database/dreeve.db`  
-**Execution Environment:** `python3`  
-**Core Engine:** `dreeve_engine.py`  
-**Generated Charts/Plots Directory:** `output/`  
-**Workout Reports Directory:** `reports/`  
+**Database Path:** `projects/dreeve/storage/database/dreeve.db`
+**Execution Environment:** `python3`
+**Core Engine:** `dreeve_engine.py`
+**Generated Charts/Plots Directory:** `output/`
+**Workout Reports Directory:** `reports/`
 
 ---
 
