@@ -1,181 +1,225 @@
-# Dreeve Running Analytics & MCP Server 🏃‍♂️📊
+# Dreeve Running Analytics & AI Coach Suite 🏃‍♂️📊
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red.svg)](https://streamlit.io/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED.svg)](https://www.docker.com/)
 [![MCP](https://img.shields.io/badge/MCP-2.0+-green.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A high-performance, token-efficient analytics engine and [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server built for self-hosted [Dreeve](https://github.com/robiningelbrecht/dreeve) / Runwise fitness databases.
+A privacy-first, zero-cloud-cost analytics engine, [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server, and interactive Dockerized web chatbot built for self-hosted [Dreeve](https://github.com/robiningelbrecht/dreeve) fitness databases.
 
-Designed specifically to empower AI pair-programming assistants (such as Google Antigravity, Claude, and ChatGPT) with instant, direct access to running metrics and sub-second kilometer splits without burning tokens on raw SQL dumps, blind directory searches, or ad-hoc scripting.
+Computes sub-second kilometer splits, decompressing high-frequency Zstandard sensor streams, analyzes arbitrary interval workouts (with natural language plan parsing or auto-detection), tracks cardiac drift, and provides an interactive self-hosted web chatbot UI alongside native AI agent tool integrations.
 
 ---
 
-## Architecture Overview
+## 🏛️ System Architecture
 
 ```mermaid
 flowchart TD
-    User["User Query / Workout Question"] --> Agent["AI Assistant (Antigravity / Claude / Cursor)"]
-    
-    subgraph Interfaces["Token-Efficient Interfaces"]
-        Agent -->|"Native Tool Call"| MCP["Dreeve MCP Server (dreeve_mcp.py)"]
-        Agent -->|"Direct Bash Command"| CLI["dreeve-cli (dreeve_engine.py)"]
+    subgraph Clients["User & AI Interfaces"]
+        Browser["👤 Web User (Browser @ :8501)"]
+        Agent["🤖 AI Assistant (Antigravity / Claude / ChatGPT)"]
+        Terminal["💻 Terminal User (CLI)"]
     end
-    
-    subgraph CoreEngine["Core Analytics Engine"]
-        MCP --> Engine["dreeve_engine.py"]
-        CLI --> Engine
-        Engine --> SQLite[("dreeve.db (Read-Only WAL Mode)")]
-        Engine --> Decompressor["Zstandard Decompressor (ActivityStream)"]
-        Engine --> Visualizer["Matplotlib Chart Engine"]
+
+    subgraph PresentationLayer["Presentation & Access Layer"]
+        Browser -->|"HTTP / WebSocket"| DockerChat["🐳 Streamlit Running Chatbot (Docker Container)"]
+        Agent -->|"stdio JSON-RPC (MCP)"| MCPServer["🔌 Dreeve MCP Server (dreeve_mcp.py)"]
+        Terminal -->|"Command Line Args"| CLI["⌨️ dreeve-cli Wrapper"]
     end
-    
-    Visualizer --> OutputDir["output/ (PNG & JPEG Visualizations)"]
-    Engine -->|"Compact JSON (~150 tokens)"| Agent
-    Agent --> User
+
+    subgraph CoreEngine["Core Analytics Engine (dreeve_engine.py)"]
+        DockerChat -->|"Local Python API"| Engine["⚡ dreeve_engine.py"]
+        MCPServer -->|"Tool Call Invocations"| Engine
+        CLI -->|"CLI Subcommands"| Engine
+
+        Engine --> StreamDecompressor["📦 Zstandard Stream Decompressor"]
+        Engine --> IntervalDetector["⏱️ Dynamic Interval & Work/Rest Segmenter"]
+        Engine --> PlanParser["📝 Natural Language Workout Plan Parser"]
+        Engine --> MathStats["📐 Pacing Deltas & Cardiac Drift Math"]
+        Engine --> ChartGen["🎨 Matplotlib & Plotly Visualizers"]
+    end
+
+    subgraph DataStorage["Local Storage Layer"]
+        Engine -->|"URI Read-Only Mode (?mode=ro)"| SQLite[("🗄️ Dreeve SQLite DB (dreeve.db)")]
+        ChartGen -->|"Saves Visualizations"| OutputDir["📁 output/ (High-Res PNG / JPG)"]
+    end
 ```
 
 ---
 
-## Key Highlights
+## ✨ Key Capabilities
 
-* **Token-Optimized Aggregation:** Queries return compact, pre-summarized JSON payloads (~150–250 tokens), preventing context window exhaustion.
-* **Sub-Second Kilometer Split Analytics:** Built-in Zstandard decompression pipeline decodes high-frequency sensor streams, computing exact split pacing, mean HR, and cardiac drift in < 0.2s.
-* **Instant Visualizations:** Generates publication-ready dark/light theme charts (`Pace vs. HR Scatter`, `Longitudinal Progression Dashboard`, `Kilometer Splits Analysis`) saved automatically into a dedicated [`output/`](./output) folder.
-* **Dual Interface:** Use as a native MCP server or as a standalone command-line tool via `dreeve-cli`.
-* **Zero Database Contention:** Connects via URI read-only mode (`?mode=ro`) with SQLite Write-Ahead Logging (WAL) support, guaranteeing zero locks on the running Dreeve instance.
+* **100% Local & Privacy-First (Zero Cloud / Token Costs):** Runs entirely on local CPU power with zero external LLM API costs or privacy leaks. All analytics, signal filtering, and data visualizations are computed in milliseconds locally.
+* **Arbitrary & Variable Interval Analysis:**
+  * Accepts natural language workout plans: e.g. `1k warmup + 4x1K @6:15 with 90s walk + 0.5k cooldown` or `0.8k easy, 2*1.5k @ 6:00, 1k @ 7:00`.
+  * Computes work interval pacing, target pace deltas, peak HR, and heart rate recovery drop during rest breaks.
+  * Robust fallback **auto-detection** for unstructured or freeform interval runs.
+* **Sub-Second Stream Decompression:** Built-in Zstandard decompression decodes sub-second GPS, cadence, heart rate, and elevation telemetry from the Dreeve `ActivityStream` store.
+* **Kilometer Splits & Cardiac Drift Tracking:** Aggregates splits across weeks or months to quantify cardiovascular decoupling and aerobic endurance progression.
+* **Containerized Web Chatbot:** Self-hosted Streamlit container (`dreeve-running-chat`) providing an interactive running coach UI with inline telemetry charts, tables, and quick action prompts.
+* **Native Model Context Protocol (MCP):** Connects directly to AI coding and research agents (Antigravity, Claude Desktop, Cursor) with token-optimized JSON summaries (~150 tokens) to prevent context exhaustion.
 
 ---
 
-## Directory Structure
+## 📁 Repository Structure
 
 ```text
 dreeve-analytics/
-├── dreeve_engine.py       # Core analytics, statistics, stream decompression & plotting engine
-├── dreeve_mcp.py          # Model Context Protocol stdio server
-├── dreeve-cli             # System executable wrapper
-├── requirements.txt       # Python dependencies
+├── app.py                     # Streamlit interactive web chatbot application
+├── Dockerfile                 # Container specification for web chatbot
+├── docker-compose.yml         # Compose configuration (volume mounts, homelab network)
+├── dreeve_engine.py           # Core analytics, interval parsing, stream decompression & plotting
+├── dreeve_mcp.py              # Model Context Protocol (MCP) server
+├── dreeve-cli                 # Executable CLI wrapper
+├── requirements.txt           # Python package requirements
 ├── config/
-│   └── mcp_config.example.json  # Sample MCP client configuration
+│   └── mcp_config.example.json # Example MCP configuration for AI agents
 ├── skill/
-│   └── dreeve-runner/
-│       └── SKILL.md       # Global Antigravity Agent Skill definition
-├── output/                # Dedicated folder for generated plots & exports
-│   ├── dreeve_pace_vs_heart_rate.png
-│   ├── dreeve_pace_hr_dashboard.png
-│   └── october_splits_pace_vs_hr.png
-└── README.md
+│   └── SKILL.md               # Antigravity Agent Skill instructions
+└── output/                    # Persistent directory for generated plots & reports
 ```
 
 ---
 
-## Sample Visualizations
+## 🚀 Getting Started
 
-All visual exports are automatically routed to the [`output/`](./output) directory:
+### 1. Running the Web Chatbot with Docker (Recommended)
 
-### 1. Standalone Pace vs. Heart Rate Scatter & Zone Efficiency
-Shows individual runs with point size proportional to distance, colored by activity recency, with Heart Rate zone bands (Zone 1 to Zone 4) and linear regression fit ($R^2 = 0.82$).
+The easiest way to use the interactive chatbot is via Docker Compose:
 
-![Pace vs Heart Rate](./output/dreeve_pace_vs_heart_rate.png)
-
-### 2. Longitudinal Dashboard (Scatter + 60-Day Timeline)
-Combines the cardiac efficiency curve with a dual-axis timeline of pacing and heart rate progression.
-
-![Performance Dashboard](./output/dreeve_pace_hr_dashboard.png)
-
-### 3. Kilometer Splits Analysis (Pace vs. Mean HR per Kilometer)
-Analyzes 83 individual kilometer splits across all October runs, colored by split progression (Km 1 through Km 8).
-
-![Kilometer Splits](./output/october_splits_pace_vs_hr.png)
-
----
-
-## Installation & Setup
-
-### 1. Prerequisites
-* Python 3.10+ (Recommended in a dedicated environment, e.g., `conda activate ml_env`)
-* Access to your local `dreeve.db` SQLite database file.
-
-### 2. Install Dependencies
 ```bash
+# Clone the repository
 git clone https://github.com/JournalKenobi/dreeve-analytics.git
 cd dreeve-analytics
-pip install -r requirements.txt
+
+# Start the chatbot container
+docker compose up -d
+```
+
+Open your browser at **[http://localhost:8501](http://localhost:8501)** to chat with your running coach.
+
+#### Docker Configuration (`docker-compose.yml`)
+The container mounts your local Dreeve database in read-only mode and connects to your local network:
+```yaml
+services:
+  dreeve-running-chat:
+    build: .
+    container_name: dreeve-running-chat
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - /path/to/dreeve/storage/database:/data/database:ro
+      - ./output:/app/output:rw
+    environment:
+      - DREEVE_DB_PATH=/data/database/dreeve.db
+      - DREEVE_OUTPUT_DIR=/app/output
+      - TZ=Asia/Kolkata
+    networks:
+      - homelab
 ```
 
 ---
 
-## CLI Usage (`dreeve-cli`)
+### 2. Standalone CLI Usage (`dreeve-cli`)
 
-A convenience wrapper is provided at `./dreeve-cli` (or link it to your `~/.local/bin/dreeve-cli`):
+For terminal workflows, use `./dreeve-cli`:
 
-### 1. High-Level Statistical Summary
+#### Variable Interval Workout Analysis
 ```bash
-dreeve-cli summary --days 60
+# Analyze with a structured plan
+./dreeve-cli intervals --plan "1k warmup + 4x1k @6:15 with 90s walk + 0.5k cooldown"
+
+# Analyze with variable distances
+./dreeve-cli intervals --plan "0.8k easy, 2x1.5k @ 6:00, 1k @ 7:00"
+
+# Auto-detect intervals without a plan
+./dreeve-cli intervals --activity <activity_id>
 ```
 
-### 2. Kilometer Splits & Cardiac Drift
+#### High-Level Performance Summary
 ```bash
-# Instant summary & cardiac drift progression (< 0.2s)
-dreeve-cli splits --month 2026-10 --summary-only
-
-# Detailed split log for a specific workout
-dreeve-cli splits --activity <activity_id>
+./dreeve-cli summary --days 60
 ```
 
-### 3. List Activities
+#### Kilometer Splits & Cardiac Drift
 ```bash
-# Recent 10 runs with heart rate telemetry
-dreeve-cli activities --days 30 --limit 10 --with-hr
-
-# Search specific workouts
-dreeve-cli activities --search "HIIT"
+./dreeve-cli splits --month 2026-10 --summary-only
 ```
 
-### 4. Generate Performance Charts
+#### Generate Telemetry Charts
 ```bash
-# Standalone pace vs HR curve (saved to output/ folder)
-dreeve-cli plot --type pace_vs_hr --days 60 --theme dark
+# Pace vs. Heart Rate Scatter
+./dreeve-cli plot --type pace_vs_hr --days 60 --theme dark
 
-# 2-Panel dashboard
-dreeve-cli plot --type dashboard --days 60 --theme dark
+# Longitudinal Performance Dashboard
+./dreeve-cli plot --type dashboard --days 60 --theme dark
 ```
 
 ---
 
-## MCP Server Integration
+### 3. MCP Server Integration (for AI Assistants)
 
-Add `dreeve` to your MCP configuration file (e.g. `~/.gemini/config/mcp_config.json` for Antigravity, or `claude_desktop_config.json`):
+Add `dreeve` to your agent's MCP configuration (`mcp_config.json`):
 
 ```json
 {
   "mcpServers": {
     "dreeve": {
-      "command": "/home/journalkenobi/miniconda3/envs/ml_env/bin/python",
-      "args": [
-        "/home/journalkenobi/projects/dreeve-analytics/dreeve_mcp.py"
-      ],
+      "command": "python",
+      "args": ["/path/to/dreeve-analytics/dreeve_mcp.py"],
       "env": {
-        "PYTHONPATH": "/home/journalkenobi/projects/dreeve-analytics",
-        "DREEVE_DB_PATH": "/home/journalkenobi/projects/dreeve/storage/database/dreeve.db",
-        "DREEVE_OUTPUT_DIR": "/home/journalkenobi/projects/dreeve-analytics/output"
+        "PYTHONPATH": "/path/to/dreeve-analytics",
+        "DREEVE_DB_PATH": "/path/to/dreeve/storage/database/dreeve.db",
+        "DREEVE_OUTPUT_DIR": "/path/to/dreeve-analytics/output"
       }
     }
   }
 }
 ```
 
-### Exposed MCP Tools
+#### Available MCP Tools
 
 | Tool | Parameters | Description |
 | :--- | :--- | :--- |
-| `dreeve_summary` | `days`, `sport` | High-level metrics, zone breakdowns, and pace-HR correlation in ~150 tokens. |
-| `dreeve_splits` | `activity_id`, `days`, `month`, `summary_only` | Sub-second kilometer splits, pace, mean HR, and cardiac drift progression. |
-| `dreeve_activities` | `days`, `limit`, `with_hr_only`, `search` | Concise tabular list of recent workouts. |
-| `dreeve_plot` | `chart_type`, `days`, `theme` | Renders and saves high-resolution charts to `output/`. |
-| `dreeve_query` | `sql` | Safely executes read-only SQL queries with automatic token safeguards. |
+| `dreeve_intervals` | `activity_id`, `plan`, `generate_plot` | Analyzes variable structured interval runs or auto-detects work/rest reps with HR recovery drops. |
+| `dreeve_summary` | `days`, `sport` | Statistical summary, HR zones, and pacing correlation in ~150 tokens. |
+| `dreeve_splits` | `activity_id`, `days`, `month`, `summary_only` | Sub-second kilometer splits, pacing, mean HR, and cardiac drift progression. |
+| `dreeve_activities` | `days`, `limit`, `with_hr_only`, `search` | Filtered list of recent workout activities. |
+| `dreeve_plot` | `chart_type`, `days`, `theme` | Renders high-resolution fitness plots directly into `output/`. |
+| `dreeve_query` | `sql` | Safe, read-only SQL query execution with automatic row/token guardrails. |
 
 ---
 
-## License
+## 📊 Sample Visualizations
+
+All visual telemetry exports are stored in [`output/`](./output):
+
+### 1. Interval Session Breakdown
+Renders continuous pace, heart rate, cadence, and elevation telemetry curves overlaid with work (blue) vs. walk recovery (orange) blocks and calculated HR drop metrics.
+
+![Interval Telemetry](./output/interval_20261105_c30392a5.png)
+
+### 2. Longitudinal Dashboard (Aerobic Efficiency + Progression)
+Combines aerobic efficiency curves with 60-day pace and heart rate progression.
+
+![Performance Dashboard](./output/dreeve_pace_hr_dashboard.png)
+
+### 3. Kilometer Splits & Cardiac Decoupling
+Visualizes pace vs. mean HR across 80+ kilometer splits to observe cardiovascular drift.
+
+![Kilometer Splits](./output/october_splits_pace_vs_hr.png)
+
+---
+
+## 🔒 Security & Concurrency
+
+- **Read-Only Database Connection**: The engine and Docker container connect to SQLite using `file:...??mode=ro` with SQLite WAL mode. It can never corrupt or lock the running Dreeve database.
+- **Isolated Sandbox**: The Docker container runs with unprivileged execution, restricted file mounts, and read-only database access.
+
+---
+
+## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
