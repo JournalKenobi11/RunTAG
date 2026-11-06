@@ -71,7 +71,13 @@ Whenever generating workout debriefs, session analyses, or markdown reports, sav
 * `--theme dark` or `--theme light`.
 * All output images (PNG + JPEG) are automatically saved to `/home/journalkenobi/projects/dreeve-analytics/output/`.
 
-### F. Custom Read-Only Queries
+### F. Self-Hosted Web Chatbot UI (Docker)
+A containerized Streamlit interactive running coach runs locally on port `8501`:
+* **URL:** `http://localhost:8501`
+* **Container Name:** `dreeve-running-chat`
+* **Features:** Natural language workout query processor, instant interval breakdown tables, inline telemetry plots, and weekly mileage volume charts.
+
+### G. Custom Read-Only Queries
 For questions requiring custom filtering or calculations:
 ```bash
 /home/journalkenobi/projects/dreeve-analytics/dreeve-cli query --sql "SELECT name, distance, movingTimeInSeconds FROM Activity WHERE distance > 5000 LIMIT 10"
