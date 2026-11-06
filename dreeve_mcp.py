@@ -63,6 +63,24 @@ def dreeve_splits(activity_id: str = None, days: int = None, month: str = None, 
         return json.dumps({"error": str(e)})
 
 @server.tool()
+def dreeve_intervals(activity_id: str = None, plan: str = None, generate_plot: bool = True) -> str:
+    """
+    Analyze structured or variable interval workouts from raw telemetry streams.
+    Supports variable intervals (e.g. '0.8k easy, 2x1.5k @ 6:00, 1k @ 7:00' or ladders/fartleks),
+    calculates work vs recovery metrics, target deltas, HR recovery drops, and generates a visualization plot.
+    activity_id: Specific activity ID or leave None for latest run.
+    plan: Optional natural language description of intended workout plan.
+    generate_plot: If True, generates and saves a publication-ready telemetry plot in output/.
+    """
+    try:
+        data = dreeve_engine.get_interval_analysis(
+            activity_id=activity_id, plan=plan, generate_plot=generate_plot
+        )
+        return json.dumps(data, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@server.tool()
 def dreeve_plot(chart_type: str = "pace_vs_hr", days: int = 60, output_path: str = None, theme: str = "dark") -> str:
     """
     Generate and save a publication-ready running performance plot as PNG/JPG.

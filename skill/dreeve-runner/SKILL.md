@@ -13,13 +13,15 @@ This skill provides direct, token-optimized access to the user's Dreeve running 
 **Database Path:** `/home/journalkenobi/projects/dreeve/storage/database/dreeve.db`  
 **Execution Environment:** `/home/journalkenobi/miniconda3/envs/ml_env/bin/python`  
 **Core Engine:** `/home/journalkenobi/projects/dreeve-analytics/dreeve_engine.py`  
-**Generated Files Directory:** `/home/journalkenobi/projects/dreeve-analytics/output/`
+**Generated Charts/Plots Directory:** `/home/journalkenobi/projects/dreeve-analytics/output/`  
+**Workout Reports Directory:** `/home/journalkenobi/projects/dreeve-analytics/reports/`  
 
 ---
 
 ## 1. Quick Execution Guide (Minimal Tokens)
 
 DO NOT write custom python scripts or search for sqlite files. All generated plots and exports are automatically placed inside `/home/journalkenobi/projects/dreeve-analytics/output/`.
+Whenever generating workout debriefs, session analyses, or markdown reports, save them directly to `/home/journalkenobi/projects/dreeve-analytics/reports/` (e.g., `workout_analysis_YYYYMMDD.md`). Never isolate them only in session-specific brain artifact folders.
 
 ### A. High-Level Summary & Training Zones (~150 tokens)
 ```bash
@@ -38,7 +40,19 @@ DO NOT write custom python scripts or search for sqlite files. All generated plo
 ```
 *Returns:* Decompressed sub-second telemetry with exact split time, pace, mean HR, and kilometer progression.
 
-### C. List Specific Runs & Workouts (~200 tokens)
+### C. Structured & Variable Interval Workout Analytics (~250 tokens)
+```bash
+# Auto-detect intervals for the latest run or specific activity
+/home/journalkenobi/projects/dreeve-analytics/dreeve-cli intervals
+/home/journalkenobi/projects/dreeve-analytics/dreeve-cli intervals --activity <activity_id>
+
+# With an intended workout plan (supports arbitrary variable intervals & ladders)
+/home/journalkenobi/projects/dreeve-analytics/dreeve-cli intervals --plan "0.8k easy, 2x1.5k @ 6:00, 1k @ 7:00"
+/home/journalkenobi/projects/dreeve-analytics/dreeve-cli intervals --plan "1k warmup + 4x1K @6:15 with 90s walk + 0.5k cooldown"
+```
+*Returns:* Exact segment breakdown (warmup, work intervals, walk/jog recoveries, cooldown), target pace vs actual pace delta, intra-interval micro-splits, heart rate recovery drop during rest, and an annotated publication-ready telemetry plot in `output/`.
+
+### D. List Specific Runs & Workouts (~200 tokens)
 ```bash
 /home/journalkenobi/projects/dreeve-analytics/dreeve-cli activities --days 60 --limit 15 --with-hr
 ```
@@ -47,7 +61,7 @@ DO NOT write custom python scripts or search for sqlite files. All generated plo
 * `--search "HIIT"`: Search workouts by name or description.
 * `--limit 10`: Limit rows to protect context size.
 
-### D. Automated Chart Generation
+### E. Automated Chart Generation
 ```bash
 /home/journalkenobi/projects/dreeve-analytics/dreeve-cli plot --type pace_vs_hr --days 60 --theme dark
 ```
@@ -57,7 +71,7 @@ DO NOT write custom python scripts or search for sqlite files. All generated plo
 * `--theme dark` or `--theme light`.
 * All output images (PNG + JPEG) are automatically saved to `/home/journalkenobi/projects/dreeve-analytics/output/`.
 
-### E. Custom Read-Only Queries
+### F. Custom Read-Only Queries
 For questions requiring custom filtering or calculations:
 ```bash
 /home/journalkenobi/projects/dreeve-analytics/dreeve-cli query --sql "SELECT name, distance, movingTimeInSeconds FROM Activity WHERE distance > 5000 LIMIT 10"
