@@ -26,3 +26,8 @@ venv/
 .vscode/
 *.swp
 *.swo
+
+# Generated output files
+output/*.png
+output/*.jpg
+reports/
