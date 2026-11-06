@@ -1,14 +1,14 @@
 {
   "mcpServers": {
-    "dreeve": {
+    "runtag": {
       "command": "python3",
       "args": [
-        "/path/to/dreeve-analytics/dreeve_mcp.py"
+        "/path/to/RunTAG/dreeve_mcp.py"
       ],
       "env": {
-        "PYTHONPATH": "/path/to/dreeve-analytics",
+        "PYTHONPATH": "/path/to/RunTAG",
         "DREEVE_DB_PATH": "/path/to/dreeve/storage/database/dreeve.db",
-        "DREEVE_OUTPUT_DIR": "/path/to/dreeve-analytics/output"
+        "DREEVE_OUTPUT_DIR": "/path/to/RunTAG/output"
       }
     }
   }

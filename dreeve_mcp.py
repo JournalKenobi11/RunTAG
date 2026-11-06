@@ -22,7 +22,7 @@ except ImportError:
 from mcp.server.mcpserver import MCPServer
 import dreeve_engine
 
-server = MCPServer("dreeve-analytics")
+server = MCPServer("runtag")
 
 @server.tool()
 def dreeve_summary(days: int = 60, sport: str = "Run") -> str:
