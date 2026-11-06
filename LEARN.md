@@ -16,7 +16,7 @@ Here is the exact difference:
 
 | Interface | Who is using it? | How does it communicate? | Does it need MCP? | Does it need an LLM? |
 | :--- | :--- | :--- | :--- | :--- |
-| **🐳 Docker Web Chatbot** (`app.py`) | **You (Human)** typing in a web browser | Direct Python function calls (`import dreeve_engine`) | ❌ **No** | ❌ **No** (Runs on local CPU) |
+| **🐳 Docker Web Chatbot** (`dreeve-running-chat`) | **You (Human)** typing in a web browser | Direct Python function calls (`import dreeve_engine`) | ❌ **No** | ❌ **No** (Runs on local CPU) |
 | **🔌 MCP Server** (`dreeve_mcp.py`) | **AI Coding Assistants** (Antigravity, Claude, ChatGPT) | Standardized JSON-RPC protocol over `stdio` | ✅ **Yes** | ✅ **Yes** (The external AI is the LLM) |
 | **💻 CLI** (`dreeve-cli`) | **Terminal / Shell scripts** | Direct Python CLI execution via `argparse` | ❌ **No** | ❌ **No** (Runs on local CPU) |
 
@@ -36,7 +36,7 @@ In traditional messy code, database calls, UI code, and business math are tangle
 In **Hexagonal Architecture**:
 1. **The Core (The Hexagon)**: `dreeve_engine.py` contains **pure business logic** (interval detection, cardiac drift math, telemetry decompression). It does not know or care if a browser, an AI, or a terminal is calling it.
 2. **The Adapters (The Ports)**:
-   - **Port 1 (Web UI Adapter)**: `app.py` translates user clicks into engine calls.
+   - **Port 1 (Web UI Adapter)**: `dreeve-running-chat` (`app.py` in standalone repo) translates user clicks into engine calls.
    - **Port 2 (Protocol Adapter)**: `dreeve_mcp.py` translates AI tool calls into engine calls.
    - **Port 3 (CLI Adapter)**: `dreeve-cli` translates terminal flags into engine calls.
    - **Port 4 (Storage Adapter)**: SQLite driver reading `dreeve.db`.
