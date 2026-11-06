@@ -7,7 +7,10 @@ from matplotlib.patches import Patch
 from scipy import stats
 import os
 
-conn = sqlite3.connect('file:/home/journalkenobi/projects/dreeve/storage/database/dreeve.db?mode=ro', uri=True)
+from pathlib import Path
+
+db_path = Path.home() / "projects" / "dreeve" / "storage" / "database" / "dreeve.db"
+conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
 conn.text_factory = bytes
 cursor = conn.cursor()
 
@@ -144,13 +147,12 @@ ax.text(0.97, 0.04, stats_box, transform=ax.transAxes,
         bbox=dict(boxstyle='round,pad=0.5', facecolor='#0b1329', edgecolor='#475569', alpha=0.92),
         color='#e2e8f0')
 
-out_path = '/home/journalkenobi/projects/dreeve-analytics/output/october_splits_pace_vs_hr.png'
+out_dir = Path(__file__).resolve().parent / "output"
+out_dir.mkdir(parents=True, exist_ok=True)
+out_path = out_dir / "october_splits_pace_vs_hr.png"
 plt.tight_layout()
-fig.savefig(out_path, dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
-fig.savefig('/home/journalkenobi/projects/dreeve-analytics/output/october_splits_pace_vs_hr.jpg', dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
+fig.savefig(str(out_path), dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
+fig.savefig(str(out_dir / "october_splits_pace_vs_hr.jpg"), dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
 plt.close(fig)
 
-# Copy to brain artifact directory as well
-import shutil
-shutil.copy(out_path, '/home/journalkenobi/.gemini/antigravity-cli/brain/69e56689-eb40-446b-86b7-ee19cf5bfce7/october_splits_pace_vs_hr.png')
 print("October splits plot generated successfully!")

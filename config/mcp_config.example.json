@@ -1,14 +1,14 @@
 {
   "mcpServers": {
     "dreeve": {
-      "command": "/home/journalkenobi/miniconda3/envs/ml_env/bin/python",
+      "command": "python3",
       "args": [
-        "/home/journalkenobi/projects/dreeve-analytics/dreeve_mcp.py"
+        "/path/to/dreeve-analytics/dreeve_mcp.py"
       ],
       "env": {
-        "PYTHONPATH": "/home/journalkenobi/projects/dreeve-analytics",
-        "DREEVE_DB_PATH": "/home/journalkenobi/projects/dreeve/storage/database/dreeve.db",
-        "DREEVE_OUTPUT_DIR": "/home/journalkenobi/projects/dreeve-analytics/output"
+        "PYTHONPATH": "/path/to/dreeve-analytics",
+        "DREEVE_DB_PATH": "/path/to/dreeve/storage/database/dreeve.db",
+        "DREEVE_OUTPUT_DIR": "/path/to/dreeve-analytics/output"
       }
     }
   }
