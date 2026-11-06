@@ -89,9 +89,16 @@ cd dreeve-analytics
 pip install -r requirements.txt
 ```
 
+### 2. Configuration
+Copy the environment template and specify the path to your Dreeve SQLite database:
+```bash
+cp .env.example .env
+# Edit .env to set your DREEVE_DB_PATH (default: ../dreeve/storage/database/dreeve.db)
+```
+
 ---
 
-### 2. Standalone CLI Usage (`dreeve-cli`)
+### 3. Standalone CLI Usage (`dreeve-cli`)
 
 A convenience wrapper is provided at `./dreeve-cli` (or symlink to `~/.local/bin/dreeve-cli`):
 
@@ -128,7 +135,7 @@ A convenience wrapper is provided at `./dreeve-cli` (or symlink to `~/.local/bin
 
 ---
 
-### 3. MCP Server Integration (for AI Assistants)
+### 4. MCP Server Integration (for AI Assistants)
 
 Add `dreeve` to your agent's MCP configuration (`mcp_config.json`):
 
